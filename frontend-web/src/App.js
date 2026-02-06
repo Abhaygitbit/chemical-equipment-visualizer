@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import { equipmentAPI } from './services/api';
 import { Pie, Bar } from 'react-chartjs-2';
+// Chemical Equipment Visualizer - Main Application Component
 import {
   Chart as ChartJS,
   ArcElement,
