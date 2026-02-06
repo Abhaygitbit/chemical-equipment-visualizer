@@ -1,4 +1,5 @@
 import sys
+import os
 import requests
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -6,7 +7,8 @@ from PyQt5.QtGui import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-API_URL = "http://localhost:8000/api"
+# Configuration - can be overridden by environment variables
+API_URL = os.environ.get("API_URL", "http://localhost:8000/api")
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -253,15 +255,16 @@ class MainWindow(QMainWindow):
             return
         
         try:
-            response = requests.get(f"{API_URL}/datasets/{self.dataset['id']}/pdf/")
-            file_path, _ = QFileDialog.getSaveFileName(self, 'Save PDF', f"report_{self.dataset['id']}.pdf", 'PDF Files (*.pdf)')
-            
-            if file_path:
-                with open(file_path, 'wb') as f:
-                    f.write(response.content)
-                QMessageBox.information(self, 'Success', 'PDF downloaded!')
+            url = f"{API_URL}/export-pdf/"
+            files = {'dataset': self.dataset}
+            response = requests.post(url, files=files)
+
+            if response.headers.get("Content-Type") == "application/json":
+                data = response.json()
+            else:
+                raise Exception("Backend did not return JSON")
         except Exception as e:
-            QMessageBox.critical(self, 'Error', str(e))
+            QMessageBox.critical(self, "Error", f"Failed to download PDF: {str(e)}")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -4,12 +4,14 @@ from pathlib import Path
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Secret key
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "unsafe-dev-key")
+# Secret key - Use environment variable for security
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-change-in-production")
 
-# Debug mode
-DEBUG = os.getenv("DEBUG") == "True"
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+# Debug mode - Set to False in production
+DEBUG = os.getenv("DEBUG", "True") == "True"
+
+# Allowed hosts
+ALLOWED_HOSTS = ["*"]  # Allow all hosts in development; restrict in production
 
 # Applications
 INSTALLED_APPS = [
@@ -20,12 +22,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'corsheaders',  # Make sure this is here
+    'corsheaders',
     'equipment_api',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # THIS MUST BE FIRST!
+    'corsheaders.middleware.CorsMiddleware',  # Must be first!
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -88,23 +90,24 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS settings (allows React to connect)
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
-
-CORS_ALLOW_CREDENTIALS = True
-
-# REST Framework
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
-}
-
-# File upload settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
-
+# CORS Settings
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -113,6 +116,7 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -124,10 +128,18 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-CORS_ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS", ""
-).split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "CSRF_TRUSTED_ORIGINS", ""
-).split(",")
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.JSONParser',
+    ]
+}
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
